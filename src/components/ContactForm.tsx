@@ -10,13 +10,33 @@ export default function ContactForm({ initialData = {}, onSubmit }: any) {
   const [group, setGroup] = useState(initialData.group || '');
   const router = useRouter();
 
-  const handleSubmit = (e: any) => {
+  const isValidEmail = (email: string) => /\S+@\S+\.\S+/.test(email);
+  const isValidPhone = (phone: string) => /^[0-9+]{6,15}$/.test(phone);
+
+  const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!name || !email || !/\S+@\S+\.\S+/.test(email)) {
-      alert('Name and valid email are required');
+
+    if (!name.trim()) {
+      alert('Name is required and cannot be empty.');
       return;
     }
-    onSubmit({ name, email, phone, group });
+
+    if (!isValidEmail(email)) {
+      alert('Please enter a valid email address.');
+      return;
+    }
+
+    if (phone && !isValidPhone(phone)) {
+      alert('Phone must be 6-15 digits and contain only numbers or "+".');
+      return;
+    }
+
+    if (group && !groups.includes(group)) {
+      alert('Group must be one of the predefined values.');
+      return;
+    }
+
+    onSubmit({ name: name.trim(), email: email.trim(), phone, group });
   };
 
   return (
