@@ -1,61 +1,43 @@
 import { useRouter } from 'next/router';
 import { useEffect, useState } from 'react';
 import { supabase } from '@/lib/supabase';
-import PostForm from '@/components/PostForm';
+import ContactForm from '@/components/ContactForm';
 
 export default function EditPage() {
   const router = useRouter();
   const { id } = router.query;
-  const [post, setPost] = useState<any>(null);
-  const [loading, setLoading] = useState(true);
+  const [contact, setContact] = useState<any>(null);
 
-  // Fetch post by ID
   useEffect(() => {
     if (id) {
-      const fetchPost = async () => {
-        const { data, error } = await supabase
-          .from('posts')
-          .select('*')
-          .eq('id', id)
-          .single();
-
-        if (error) {
-          console.error('Error fetching post:', error.message);
-          router.push('/');
-        } else {
-          setPost(data);
-        }
-
-        setLoading(false);
-      };
-
-      fetchPost();
+      supabase
+        .from('contacts')
+        .select('*')
+        .eq('id', id)
+        .single()
+        .then(({ data }) => {
+          setContact(data);
+        });
     }
-  }, [id, router]);
+  }, [id]);
 
-  const handleUpdate = async (updatedData: any) => {
-    const { error } = await supabase.from('posts').update(updatedData).eq('id', id);
-
-    if (error) {
-      alert('Failed to update post');
-      console.error(error);
-    } else {
-      router.push('/');
-    }
+  const handleUpdate = async (data: any) => {
+    await supabase.from('contacts').update(data).eq('id', id);
+    router.push('/');
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 px-4 py-10">
-      {/* <h1 className="text-3xl font-bold text-center text-gray-800 mb-10 flex items-center justify-center gap-2">
-        📝 Edit Post
-      </h1> */}
+    <div className="min-h-screen bg-[#F5F5EB] px-4 py-10">
+      <h1 className="text-3xl font-bold text-center text-[#6F5D4F] mb-10 flex items-center justify-center gap-2">
+         Edit Contact
+      </h1>
 
-      {loading ? (
-        <p className="text-center text-gray-600">Loading...</p>
-      ) : post ? (
-        <PostForm initialData={post} onSubmit={handleUpdate} />
+      {contact ? (
+        <div className="max-w-xl mx-auto bg-[#EFE7DA] p-6 rounded-2xl shadow border border-[#C1B6A3]">
+          <ContactForm initialData={contact} onSubmit={handleUpdate} />
+        </div>
       ) : (
-        <p className="text-center text-red-500">Post not found.</p>
+        <p className="text-center text-red-500">Contact not found.</p>
       )}
     </div>
   );
